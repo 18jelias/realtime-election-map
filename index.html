@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+body {
+  font-family: 'Helvetica', 'Arial', sans-serif;
+  background-color: white;
+}
+
+h1 {
+  color: black;
+  margin-left: 50px;
+  margin-bottom: 0px;
+}
+
+h3 {
+  margin-bottom: -10px;
+  margin-top: 0px;
+}
+
+p {
+  display: block;
+  margin-left: 50px;
+  margin-top: 10px;
+  margin-bottom: 0px;
+ }
+
+path {
+  stroke-width: 1px;
+  stroke: white;
+  fill: rgb(196,230,233);
+  cursor: pointer;
+}
+
+path:hover, path.highlighted {
+  fill: #CCC;
+}
+
+div.tooltip {
+  position: absolute;
+  background-color: white;
+  border: 1px solid black;
+  color: black;
+  font-weight: bold;
+  padding: 4px 8px;
+  display: none;
+}
+
+</style>
+<body>
+<script src="https://d3js.org/d3.v3.min.js"></script>
+<script src="https://d3js.org/topojson.v1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+
+<h1 id="title">How many states will it take to win?</h1>
+<p id="text">It only takes 270 to win.</p>
+<p id="remaining"></p>
+<script>
+
+var dict = [
+  {
+    "name": "California",
+    "count": 55,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "39,144,818",
+  },
+  {
+    "name": "Maryland",
+    "count": 10,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "6,006,401",
+  },  
+  {
+    "name": "Oregon",
+    "count": 7,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "4,028,977",
+  }, 
+  {
+    "name": "Washington",
+    "count": 12,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "7,170,351",
+  }, 
+  {
+    "name": "Idaho",
+    "count": 4,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "1,654,930",
+  },
+  {
+    "name": "Nevada",
+    "count": 6,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "2,890,845",
+  },
+  {
+    "name": "Montana",
+    "count": 3,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "1,032,949",
+  },
+  {
+    "name": "Utah",
+    "count": 6,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "2,995,919",
+  },
+  {
+    "name": "Arizona",
+    "count": 11,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "6,828,065",
+  },
+  {
+    "name": "Wyoming",
+    "count": 3,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "586,107",
+  },
+  {
+    "name": "Colorado",
+    "count": 9,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "5,456,574",
+  },
+  {
+    "name": "New Mexico",
+    "count": 5,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "2,085,109",
+  },
+  {
+    "name": "North Dakota",
+    "count": 3,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "756,927",
+  },
+  {
+    "name": "South Dakota",
+    "count": 3,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "858,469",
+  },
+  {
+    "name": "Nebraska",
+    "count": 5,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "1,896,190",
+  },
+  {
+    "name": "Kansas",
+    "count": 6,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "2,911,641",
+  },
+  {
+    "name": "Oklahoma",
+    "count": 7,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "3,911,338",
+  },
+  {
+    "name": "Texas",
+    "count": 38,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "27,469,114",
+  },
+  {
+    "name": "Minnesota",
+    "count": 10,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "5,489,594",
+  },
+  {
+    "name": "Iowa",
+    "count": 6,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "3,123,899",
+  },
+  {
+    "name": "Missouri",
+    "count": 10,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "6,083,672",
+  },
+  {
+    "name": "Arkansas",
+    "count": 6,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "2,978,204",
+  },
+  {
+    "name": "Louisiana",
+    "count": 8,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "4,670,724",
+  },
+  {
+    "name": "Wisconsin",
+    "count": 10,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "5,771,337",
+  },
+  {
+    "name": "Illinois",
+    "count": 20,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "12,859,995",
+  },
+  {
+    "name": "Tennessee",
+    "count": 11,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "6,600,299",
+  },
+  {
+    "name": "Mississippi",
+    "count": 6,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "2,992,333",
+  },
+  {
+    "name": "Alabama",
+    "count": 9,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "4,858,979",
+  },
+  {
+    "name": "Georgia",
+    "count": 16,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "10,214,860",
+  },
+  {
+    "name": "Florida",
+    "count": 29,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "20,271,272",
+  },
+  {
+    "name": "South Carolina",
+    "count": 9,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "4,896,146",
+  },
+  {
+    "name": "Kentucky",
+    "count": 8,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "4,425,092",
+  },
+  {
+    "name": "Indiana",
+    "count": 11,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "6,619,680",
+  },
+  {
+    "name": "Michigan",
+    "count": 16,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "9,922,576",
+  },
+  {
+    "name": "Ohio",
+    "count": 18,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "11,613,423",
+  },
+  {
+    "name": "West Virginia",
+    "count": 5,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "1,844,128",
+  },
+  {
+    "name": "Virginia",
+    "count": 13,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "8,382,993",
+  },
+  {
+    "name": "North Carolina",
+    "count": 15,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "10,042,802",
+  },
+  {
+    "name": "Pennsylvania",
+    "count": 20,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "12,802,503",
+  },
+  {
+    "name": "New York",
+    "count": 29,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "19,795,791",
+  },
+  {
+    "name": "Maine",
+    "count": 4,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "1,329,328",
+  },
+  {
+    "name": "Vermont",
+    "count": 3,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "626,042",
+  },
+  {
+    "name": "New Hampshire",
+    "count": 4,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "1,330,608",
+  },
+  {
+    "name": "Massachusetts",
+    "count": 11,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "6,794,422",
+  },
+  {
+    "name": "Rhode Island",
+    "count": 4,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "1,056,298",
+  },
+  {
+    "name": "Connecticut",
+    "count": 7,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "3,590,886",
+  },
+  {
+    "name": "New Jersey",
+    "count": 14,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "8,958,013",
+  },
+  {
+    "name": "Delaware",
+    "count": 3,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "945,934",
+  },
+  {
+    "name": "District of Columbia",
+    "count": 3,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "672,228",
+  },
+  {
+    "name": "Alaska",
+    "count": 3,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "738,432",
+  },
+  {
+    "name": "Hawaii",
+    "count": 4,
+    "rep": false,
+    "dem": false,
+    "other": true,
+    "population": "1,431,603",
+  },     
+  ];
+//Map dimensions (in pixels)
+var width = 800,
+    height = 600;
+    repCount = 0;
+    demCount = 0; 
+
+
+
+//Map projection
+var projection = d3.geo.albersUsa()
+    .scale(973.2182995482108)
+    .translate([width/2,height/2]) //translate to center the map in view
+
+//Generate paths based on projection
+var path = d3.geo.path()
+    .projection(projection);
+
+//Create an SVG
+var svg = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+//Group for the map features
+var features = svg.append("g")
+    .attr("class","features");
+
+//Create a tooltip, hidden at the start
+var tooltip = d3.select("body").append("div").attr("class","tooltip");
+
+function findState(name) {
+  for(let i = 0; i < dict.length; i++) {
+    if(name === dict[i].name) return dict[i];
+  }
+}
+
+d3.json("cb_2015_us_state_500k.topojson",function(error,geodata) {
+  if (error) return console.log(error); //unknown error, check the console
+
+  //Create a path for each map feature in the data
+  features.selectAll("path")
+    .data(topojson.feature(geodata,geodata.objects.collection).features) //generate features from TopoJSON
+    .enter()
+    .append("path")
+    .attr("d",path)
+    .style("fill", function(d) {
+       for(let i = 0; i < dict.length; i++) {
+
+          if(d.properties.NAME === dict[i].name) {
+            if(dict[i].rep) {
+                return 'rgb(255,0,0)';
+            } else if(dict[i].dem) {
+                return 'rgb(0,0,255)';
+            } else {
+                return 'rgb(196,230,233)';
+            }
+          } 
+        }
+
+    })
+    .on("mouseover",showPopup)
+    .on("mousemove",movePopup)
+    .on("mouseout",hidePopup)
+    .on("click",clicked);
+
+    recount();
+    document.getElementById("remaining").innerHTML = "Trump needs " + (270 - repCount) + " more electoral votes to win, and Clinton needs " +
+                                                      (270 - demCount) + " more electoral votes to win";
+
+});
+
+// Add optional onClick events for features here
+// d.properties contains the attributes (e.g. d.properties.name, d.properties.population)
+function clicked(d,i) {
+
+}
+
+function recount() {
+  demCount = 0;
+  repCount = 0;
+  for(let i = 0; i < dict.length; i++) {
+    if(dict[i].rep) {
+      repCount = dict[i].count + repCount; 
+    } else if (dict[i].dem) {
+      demCount = dict[i].count + demCount; 
+    }
+  }
+
+}
+
+
+//Position of the tooltip relative to the cursor
+var tooltipOffset = {x: 5, y: -25};
+
+//Create a tooltip, hidden at the start
+function showPopup(d) {
+  d3.select(this)
+    .style('width', '150%')
+    .style('height', '150%')
+  movePopup();
+  var temp = findState(d.properties.NAME);
+  tooltip.style("display","block")
+      .html('<h3>' + d.properties.NAME + '</h3>' + '<br/>' + 
+            "Electoral votes: " + temp.count + '<br/>' +
+            "Population: " + temp.population);
+}
+
+//Move the tooltip to track the mouse
+function movePopup() {
+  tooltip.style("top",(d3.event.pageY+tooltipOffset.y)+"px")
+      .style("left",(d3.event.pageX+tooltipOffset.x)+"px");
+}
+
+//Create a tooltip, hidden at the start
+function hidePopup() {
+    d3.select(this)
+    .style('width', '100%')
+    .style('height', '100%')
+  tooltip.style("display","none");
+}
+</script>
